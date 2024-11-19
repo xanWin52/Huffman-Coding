@@ -11,8 +11,8 @@
  *  Grader name: Brad
  *
  *  Student 2 Siddarth Saladi
- *  UTEID: ss229786
- *  email address: sidsaladi@utexas.edu
+ *  UTEID:
+ *  email address:
  *
  */
 
