@@ -52,24 +52,34 @@ public class SimpleHuffProcessor implements IHuffProcessor {
         // readBits gives -1 when file is done
         while (isNeg != -1) {
             // inc freq at that spot
+
+            //showString(isNeg + "");
             allBits[isNeg]++;
             isNeg = preProcess.readBits(BITS_PER_WORD);
         }
+        // native array is populated
         preProcess.close();
         PriorityQueue314<TreeNode> ogQueue = new PriorityQueue314<>();
         int ogCharacters = 0;
         for (int x = 0; x < ALPH_SIZE; x++) {
             // adding node with val of character and freq
-            ogQueue.add(new TreeNode(x, allBits[x]));
-            ogCharacters += allBits[x];
+            if (allBits[x] != 0) {
+                ogQueue.add(new TreeNode(x, allBits[x]));
+                ogCharacters += allBits[x];
+            }
         }
         // queue is now populated
         hTree = new HuffmanTree(ogQueue, allBits);
 
         int ogBits = ogCharacters * BITS_PER_WORD;
+
         int encBits = 0;
+        showString(ogBits + "");
+        // Counts bits in compressed
         for (int x = 0; x < ALPH_SIZE; x++) {
-            encBits += allBits[x] * hTree.get(x).length();
+            if (!(hTree.get(x) == null)){
+                encBits += allBits[x] * hTree.get(x).length();
+            }
         }
         // for magic number and header
         encBits += BITS_PER_INT * 2;
@@ -152,7 +162,7 @@ public class SimpleHuffProcessor implements IHuffProcessor {
      */
     public int uncompress(InputStream in, OutputStream out) throws IOException {
 	        throw new IOException("uncompress not implemented");
-	        //return 0;
+	        // return 0;
     }
 
     public void setViewer(IHuffViewer viewer) {

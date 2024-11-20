@@ -22,7 +22,7 @@ public class Huff {
         IHuffViewer sv = new GUIHuffViewer("Huffman Compression");
         // IHuffViewer sv = new TextHuffViewer();
         IHuffProcessor proc = new SimpleHuffProcessor();
-        sv.setModel(proc);    
+        sv.setModel(proc);
         if (sv instanceof TextHuffViewer) {
             ((TextHuffViewer) sv).start();
         }
