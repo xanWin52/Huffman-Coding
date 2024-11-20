@@ -41,7 +41,7 @@ public class PriorityQueue314<E extends Comparable<? super E>> {
 
     /**
      * Method to remove from the front of the priority queue
-     * @return
+     * @return the data in the removed node
      */
     public E dequeue(){
         Node<E> temp = front;

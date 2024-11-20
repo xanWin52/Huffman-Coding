@@ -94,7 +94,7 @@ public class HuffMark {
              buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
              byte[] barray = new byte[buffer.limit()];
            
-             if (barray.length != channel.size()){               
+             if (barray.length != channel.size()){
                  System.err.println(String.format("Reading %s error: lengths differ %d %ld\n",f.getName(),barray.length,channel.size()));
              }
              buffer.get(barray);

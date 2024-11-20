@@ -11,8 +11,8 @@
  *  Grader name: Brad
  *
  *  Student 2 Siddarth Saladi
- *  UTEID:
- *  email address:
+ *  UTEID: ss229786
+ *  email address: sidsaladi@utexas.edu
  *
  */
 
@@ -22,6 +22,7 @@ import java.io.OutputStream;
 
 public class SimpleHuffProcessor implements IHuffProcessor {
 
+    private HuffmanTree hTree;
     private IHuffViewer myViewer;
 
     /**
@@ -42,10 +43,47 @@ public class SimpleHuffProcessor implements IHuffProcessor {
      * @throws IOException if an error occurs while reading from the input file.
      */
     public int preprocessCompress(InputStream in, int headerFormat) throws IOException {
-        showString("Not working yet");
-        myViewer.update("Still not working");
-        throw new IOException("preprocess not implemented");
-        //return 0;
+
+        BitInputStream preProcess = new BitInputStream(in);
+        int[] allBits = new int[ALPH_SIZE];
+        int isNeg = preProcess.readBits(BITS_PER_WORD);
+        // readBits gives -1 when file is done
+        while (isNeg != -1) {
+            // inc freq at that spot
+            allBits[isNeg]++;
+            isNeg = preProcess.readBits(BITS_PER_WORD);
+        }
+        preProcess.close();
+        PriorityQueue314<TreeNode> ogQueue = new PriorityQueue314<>();
+        int ogCharacters = 0;
+        for (int x = 0; x < ALPH_SIZE; x++) {
+            // adding node with val of character and freq
+            ogQueue.add(new TreeNode(x, allBits[x]));
+            ogCharacters += allBits[x];
+        }
+        // queue is now populated
+        hTree = new HuffmanTree(ogQueue);
+
+        int ogBits = ogCharacters * BITS_PER_WORD;
+        int encBits = 0;
+        for (int x = 0; x < ALPH_SIZE; x++) {
+            encBits += allBits[x] * htree.get(x).length();
+        }
+        // for magic number and header
+        encBits += BITS_PER_INT * 2;
+
+        // check if store counts or tree
+        if (headerFormat == STORE_COUNTS) {
+            encBits += hTree.calculateCountHeader();
+        }
+        else if (STORE_TREE == headerFormat) {
+            encBits += hTree.calculateTreeHeader();
+        }
+        else {
+            throw new IllegalArgumentException("header format paramater is invalid");
+        }
+        // return diff between original and huffman bits
+        return ogBits - encBits;
     }
 
     /**
