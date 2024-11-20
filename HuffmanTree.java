@@ -22,9 +22,6 @@ public class HuffmanTree implements IHuffConstants {
         root = frequencies.dequeue();
         codes = new HashMap<>();
         createMap(root, codes, "");
-        for (int g : codes.keySet()) {
-            System.out.println( g + ": " + codes.get(g));
-        }
     }
 
     /*
@@ -41,13 +38,46 @@ public class HuffmanTree implements IHuffConstants {
 
     public int calculateTreeHeader(){
         //header consists of 32-bit integer that indicates number of bits to store the tree,
-        //a 0 for each internal node, and (BITS_PER_WORD + 1) bits per number of leaves
-        return BITS_PER_INT + numInternal + numLeaves * (BITS_PER_WORD + 1);
+        //a 0 for each internal node, and (BITS_PER_WORD + 1) bits per number of leaves,
+        // and the length of the PEOF.
+        return BITS_PER_INT + numInternal + numLeaves * (BITS_PER_WORD + 1) 
+            + codes.get(PSEUDO_EOF).length();
     }
 
-    public int calculateCountHeader(){
-        //header consists of a 32 bit integer for each of the possible alpha values.
-        return BITS_PER_INT * ALPH_SIZE;
+    /**
+     * Method to calculate the number of bits needed to store the tree information using the counts
+     * @return The total number of bits needed to write the header, not including the magic number
+     */
+    public int calculateCountHeaderLength(){
+        return BITS_PER_INT * ALPH_SIZE + codes.get(PSEUDO_EOF).length();
+    }
+
+    public int writeTree(BitOutputStream out, int headerFormat){
+        int bitsWritten = 0;
+        if(headerFormat == STORE_COUNTS){
+            for(int i = 0; i < ALPH_SIZE; i ++){
+                bitsWritten += BITS_PER_INT;
+                out.writeBits(BITS_PER_INT, freqArr[i]);
+            }
+        } else if(headerFormat == STORE_TREE){
+            bitsWritten = writeTreeHelper(root, out);
+        }
+        return bitsWritten;
+    }
+
+    private int writeTreeHelper(TreeNode cur, BitOutputStream out){
+        if(cur == null){
+            return 0;
+        } else if(cur.isLeaf()){
+            out.writeBits(1, 1);
+            out.writeBits(BITS_PER_WORD + 1, cur.getValue());
+            return 1 + BITS_PER_WORD + 1;
+        } else {
+            out.writeBits(1, 0);
+            int result = 0;
+            result += writeTreeHelper(cur.getLeft(), out) + writeTreeHelper(cur.getRight(), out); 
+            return result;
+        }
     }
 
     /**
