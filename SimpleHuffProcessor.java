@@ -24,6 +24,8 @@ public class SimpleHuffProcessor implements IHuffProcessor {
 
     private HuffmanTree hTree;
     private IHuffViewer myViewer;
+    private int spaceSaved;
+    private int headerFormat;
 
     /**
      * Preprocess data so that compression is possible ---
@@ -67,7 +69,7 @@ public class SimpleHuffProcessor implements IHuffProcessor {
             }
         }
         // queue is now populated
-        hTree = new HuffmanTree(ogQueue);
+        hTree = new HuffmanTree(ogQueue, allBits);
 
         int ogBits = ogCharacters * BITS_PER_WORD;
 
@@ -84,16 +86,18 @@ public class SimpleHuffProcessor implements IHuffProcessor {
 
         // check if store counts or tree
         if (headerFormat == STORE_COUNTS) {
-            encBits += hTree.calculateCountHeader();
+            encBits += hTree.calculateCountHeaderLength();
         }
         else if (STORE_TREE == headerFormat) {
-            encBits += hTree.calculateTreeHeader();
+            encBits += hTree.calculateTreeHeaderLength();
         }
         else {
             throw new IllegalArgumentException("header format paramater is invalid");
         }
         // return diff between original and huffman bits
-        return ogBits - encBits;
+        spaceSaved = ogBits - encBits;
+        this.headerFormat = headerFormat;
+        return spaceSaved;
     }
 
     /**
@@ -112,8 +116,39 @@ public class SimpleHuffProcessor implements IHuffProcessor {
      */
     public int compress(InputStream in, OutputStream out, boolean force) throws IOException {
         
-        
-        //return 0;
+        BitInputStream bitsIn = new BitInputStream(in);
+
+        if(spaceSaved < 0 && !force) {
+            //TODO
+            //NOT COMPRESSING
+            return -1;
+            
+        } else {
+            //COMPRESSING
+            int bitsWritten = 0;
+
+            BitOutputStream bitsOut = new BitOutputStream(out);
+
+            bitsOut.writeBits(BITS_PER_INT, MAGIC_NUMBER);
+            bitsOut.writeBits(BITS_PER_INT, headerFormat);
+
+            bitsWritten += BITS_PER_INT * 2;
+            bitsWritten += hTree.writeTree(bitsOut, headerFormat);
+            int curCharacter = bitsIn.readBits(BITS_PER_WORD);
+
+            while(curCharacter != -1){
+                String huffCode = hTree.get(curCharacter);
+                bitsOut.writeBits(huffCode.length(), Integer.parseInt(huffCode, 2));
+                bitsWritten += huffCode.length();
+                curCharacter = bitsIn.readBits(BITS_PER_WORD);
+            }
+
+            String PEOFcode = hTree.get(PSEUDO_EOF);
+            bitsOut.writeBits(PEOFcode.length(), Integer.parseInt(PEOFcode, 2));
+            bitsWritten += PEOFcode.length();
+            
+            return bitsWritten;
+        }
     }
 
     /**
