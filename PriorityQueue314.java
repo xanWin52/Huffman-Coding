@@ -1,3 +1,4 @@
+
 public class PriorityQueue314<E extends Comparable<? super E>> {
 
     private Node<E> front;

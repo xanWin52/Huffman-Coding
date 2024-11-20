@@ -67,7 +67,7 @@ public class SimpleHuffProcessor implements IHuffProcessor {
         int ogBits = ogCharacters * BITS_PER_WORD;
         int encBits = 0;
         for (int x = 0; x < ALPH_SIZE; x++) {
-            encBits += allBits[x] * htree.get(x).length();
+            encBits += allBits[x] * hTree.get(x).length();
         }
         // for magic number and header
         encBits += BITS_PER_INT * 2;
@@ -101,7 +101,8 @@ public class SimpleHuffProcessor implements IHuffProcessor {
      * writing to the output file.
      */
     public int compress(InputStream in, OutputStream out, boolean force) throws IOException {
-        throw new IOException("compress is not implemented");
+        
+        
         //return 0;
     }
 
