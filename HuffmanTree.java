@@ -1,3 +1,21 @@
+/*  Student information for assignment:
+ *
+ *  On <MY|OUR> honor, Xander Nguyen and Siddarth Saladi, this programming assignment is <MY|OUR> own work
+ *  and <I|WE> have not provided this code to any other student.
+ *
+ *  Number of slip days used:
+ *
+ *  Student 1 Xander Nguyen (Student whose Canvas account is being used)
+ *  UTEID: xmn64
+ *  email address: xmn64@my.utexas.edu
+ *  Grader name: Brad
+ *
+ *  Student 2 Siddarth Saladi
+ *  UTEID: ss229786
+ *  email address: sidsaladi@utexas.edu
+ *
+ */
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +79,7 @@ public class HuffmanTree implements IHuffConstants {
         createMap(root, codes, "");
     }
 
+    //Recursive method to read the flattened tree and build the resulting huffman tree
     private TreeNode buildTreeHelper(int[] count, BitInputStream in) throws IOException{
         if(count[0] < 0){
             return null;
@@ -81,23 +100,22 @@ public class HuffmanTree implements IHuffConstants {
 
     /**
      * Method to calculate the number of bits needed to store the tree information using the 
-     * STORE_TREE method.
+     * STORE_TREE method or the STORE_COUNTS method.
      * @return The number of bits needed to write the header, not including the magic number.
      */
-    public int calculateTreeHeaderLength(){
+    public int calculateHeaderLength(int headerFormat){
         //header consists of 32-bit integer that indicates number of bits to store the tree,
         //a 0 for each internal node, and (BITS_PER_WORD + 1) bits per number of leaves,
         // and the length of the PEOF.
-        return BITS_PER_INT + numInternal + numLeaves * (BITS_PER_WORD + 2) 
-            + codes.get(PSEUDO_EOF).length();
-    }
+        if(headerFormat == STORE_TREE){
+            return BITS_PER_INT + numInternal + numLeaves * (BITS_PER_WORD + 2) 
+                + codes.get(PSEUDO_EOF).length();
 
-    /**
-     * Method to calculate the number of bits needed to store the tree information using the counts
-     * @return The total number of bits needed to write the header, not including the magic number
-     */
-    public int calculateCountHeaderLength(){
-        return BITS_PER_INT * ALPH_SIZE + codes.get(PSEUDO_EOF).length();
+        //header consists of 256, 32 bit integers that represent the frequencies of each character
+        } else if(headerFormat == STORE_COUNTS){
+            return BITS_PER_INT * ALPH_SIZE + codes.get(PSEUDO_EOF).length();
+        }
+        throw new IllegalArgumentException("header format paramater is invalid");
     }
 
     /**

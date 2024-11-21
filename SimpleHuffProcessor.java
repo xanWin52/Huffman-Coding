@@ -60,21 +60,18 @@ public class SimpleHuffProcessor implements IHuffProcessor {
         // native array is populated
         preProcess.close();
         PriorityQueue314<TreeNode> ogQueue = new PriorityQueue314<>();
-        int ogCharacters = 0;
+        int ogBits = 0;
         for (int x = 0; x < ALPH_SIZE; x++) {
             // adding node with val of character and freq
             if (allBits[x] != 0) {
                 ogQueue.add(new TreeNode(x, allBits[x]));
-                ogCharacters += allBits[x];
+                ogBits += allBits[x] * BITS_PER_WORD;
             }
         }
         // queue is now populated
         hTree = new HuffmanTree(ogQueue, allBits);
 
-        int ogBits = ogCharacters * BITS_PER_WORD;
-
         int encBits = 0;
-        showString(ogBits + "");
         // Counts bits in compressed
         for (int x = 0; x < ALPH_SIZE; x++) {
             if (!(hTree.get(x) == null)){
@@ -85,20 +82,10 @@ public class SimpleHuffProcessor implements IHuffProcessor {
         encBits += BITS_PER_INT * 2;
 
         // check if store counts or tree
-        if (headerFormat == STORE_COUNTS) {
-            encBits += hTree.calculateCountHeaderLength();
-        }
-        else if (STORE_TREE == headerFormat) {
-            encBits += hTree.calculateTreeHeaderLength();
-        }
-        else {
-            throw new IllegalArgumentException("header format paramater is invalid");
-        }
+        encBits += hTree.calculateHeaderLength(headerFormat);
         // return diff between original and huffman bits
-        showString(encBits + "");
         spaceSaved = ogBits - encBits;
         this.headerFormat = headerFormat;
-        showString(spaceSaved + "");
         return spaceSaved;
     }
 
@@ -120,7 +107,6 @@ public class SimpleHuffProcessor implements IHuffProcessor {
 
         if(spaceSaved < 0 && !force) {
             return -1;
-            
         } else {
             //COMPRESSING
             int bitsWritten = 0;
@@ -128,13 +114,16 @@ public class SimpleHuffProcessor implements IHuffProcessor {
             BitInputStream bitsIn = new BitInputStream(in);
             BitOutputStream bitsOut = new BitOutputStream(out);
 
+            //Writing magic number and the number indicating the header format
             bitsOut.writeBits(BITS_PER_INT, MAGIC_NUMBER);
             bitsOut.writeBits(BITS_PER_INT, headerFormat);
-
             bitsWritten += BITS_PER_INT * 2;
-            bitsWritten = hTree.writeTree(bitsOut, headerFormat);
-            int curCharacter = bitsIn.readBits(BITS_PER_WORD);
 
+            //Writing body of the header which changes depending on the headerFormat
+            bitsWritten += hTree.writeTree(bitsOut, headerFormat);
+
+            //Reading in BITS_PER_WORD bits in at a time
+            int curCharacter = bitsIn.readBits(BITS_PER_WORD);
             while(curCharacter != -1){
                 String huffCode = hTree.get(curCharacter);
                 bitsOut.writeBits(huffCode.length(), Integer.parseInt(huffCode, 2));
@@ -142,11 +131,13 @@ public class SimpleHuffProcessor implements IHuffProcessor {
                 curCharacter = bitsIn.readBits(BITS_PER_WORD);
             }
 
+            //Writing the PSEUDO_EOF value
             String PEOFcode = hTree.get(PSEUDO_EOF);
             bitsOut.writeBits(PEOFcode.length(), Integer.parseInt(PEOFcode, 2));
             bitsWritten += PEOFcode.length();
             bitsOut.close();
             bitsIn.close();
+            showString(bitsWritten + "");
             return bitsWritten;
         }
     }
@@ -164,20 +155,29 @@ public class SimpleHuffProcessor implements IHuffProcessor {
 	    BitInputStream bitIn = new BitInputStream(in);
         BitOutputStream bitOut = new BitOutputStream(out);
         int bitsWritten = 0;
+    
+        //Check that the file being decompressed is a Huffman coded file
         int magicNum = bitIn.readBits(BITS_PER_INT);
         if(magicNum != MAGIC_NUMBER){
+            bitIn.close();
+            bitOut.close();
             throw new IOException("This file is not a Huffman coded file");
         }
-        int headerFormat = bitIn.readBits(BITS_PER_INT);
+
+        //Getting format of header
+        headerFormat = bitIn.readBits(BITS_PER_INT);
         
+        //Reading header information and building the huffman tree
         HuffmanTree key = readHeader(bitIn, headerFormat);
 
+        //decoding huffman file and counting the number of bits written
         bitsWritten += key.decodeAndWrite(bitIn, bitOut);
+        bitIn.close();
         bitOut.close();
-        showString(bitsWritten + "");
         return bitsWritten;
     }
 
+    //Private helper method to read the header information and build the HuffmanTree 
     private static HuffmanTree readHeader(BitInputStream in, int headerFormat) throws IOException{
         if(headerFormat == STORE_COUNTS){
             PriorityQueue314<TreeNode> pq = new PriorityQueue314<>();

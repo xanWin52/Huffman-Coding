@@ -1,4 +1,20 @@
-
+/*  Student information for assignment:
+ *
+ *  On <MY|OUR> honor, Xander Nguyen and Siddarth Saladi, this programming assignment is <MY|OUR> own work
+ *  and <I|WE> have not provided this code to any other student.
+ *
+ *  Number of slip days used:
+ *
+ *  Student 1 Xander Nguyen (Student whose Canvas account is being used)
+ *  UTEID: xmn64
+ *  email address: xmn64@my.utexas.edu
+ *  Grader name: Brad
+ *
+ *  Student 2 Siddarth Saladi
+ *  UTEID: ss229786
+ *  email address: sidsaladi@utexas.edu
+ *
+ */
 public class PriorityQueue314<E extends Comparable<? super E>> {
 
     private Node<E> front;
