@@ -117,8 +117,6 @@ public class SimpleHuffProcessor implements IHuffProcessor {
      * writing to the output file.
      */
     public int compress(InputStream in, OutputStream out, boolean force) throws IOException {
-        
-        BitInputStream bitsIn = new BitInputStream(in);
 
         if(spaceSaved < 0 && !force) {
             return -1;
@@ -127,6 +125,7 @@ public class SimpleHuffProcessor implements IHuffProcessor {
             //COMPRESSING
             int bitsWritten = 0;
 
+            BitInputStream bitsIn = new BitInputStream(in);
             BitOutputStream bitsOut = new BitOutputStream(out);
 
             bitsOut.writeBits(BITS_PER_INT, MAGIC_NUMBER);
@@ -146,9 +145,6 @@ public class SimpleHuffProcessor implements IHuffProcessor {
             String PEOFcode = hTree.get(PSEUDO_EOF);
             bitsOut.writeBits(PEOFcode.length(), Integer.parseInt(PEOFcode, 2));
             bitsWritten += PEOFcode.length();
-            if(bitsWritten % 8 != 0){
-
-            }
             bitsOut.close();
             bitsIn.close();
             return bitsWritten;
@@ -176,8 +172,29 @@ public class SimpleHuffProcessor implements IHuffProcessor {
         
         HuffmanTree key = readHeader(bitIn, headerFormat);
 
-        bitsWritten += key.decodeAndWrite(bitIn, bitOut);        
-	
+        bitsWritten += key.decodeAndWrite(bitIn, bitOut);
+        bitOut.close();        
+        return bitsWritten;
+    }
+
+    private static HuffmanTree readHeader(BitInputStream in, int headerFormat) throws IOException{
+        if(headerFormat == STORE_COUNTS){
+            PriorityQueue314<TreeNode> pq = new PriorityQueue314<>();
+            for(int i = 0; i < ALPH_SIZE; i ++){
+                int freq = in.readBits(BITS_PER_INT);
+                if(freq != 0){
+                    pq.add(new TreeNode(i, freq));
+                }
+            }
+            //won't need a frequency array because this tree will be used exclusively for decoding
+            return new HuffmanTree(pq, null);
+        } else if(headerFormat == STORE_TREE){
+            int[] numBits = {in.readBits(BITS_PER_INT)};
+            HuffmanTree res = new HuffmanTree();
+            res.buildTree(numBits, in);
+            return res;
+        }
+        return null;
     }
 
     public void setViewer(IHuffViewer viewer) {
