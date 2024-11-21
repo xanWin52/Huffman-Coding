@@ -121,8 +121,6 @@ public class SimpleHuffProcessor implements IHuffProcessor {
         BitInputStream bitsIn = new BitInputStream(in);
 
         if(spaceSaved < 0 && !force) {
-            //TODO
-            //NOT COMPRESSING
             return -1;
             
         } else {
@@ -135,7 +133,6 @@ public class SimpleHuffProcessor implements IHuffProcessor {
             bitsOut.writeBits(BITS_PER_INT, headerFormat);
 
             bitsWritten += BITS_PER_INT * 2;
-            bitsOut.writeBits(BITS_PER_INT, hTree.calculateTreeHeaderLength());
             bitsWritten = hTree.writeTree(bitsOut, headerFormat);
             int curCharacter = bitsIn.readBits(BITS_PER_WORD);
 
@@ -149,7 +146,11 @@ public class SimpleHuffProcessor implements IHuffProcessor {
             String PEOFcode = hTree.get(PSEUDO_EOF);
             bitsOut.writeBits(PEOFcode.length(), Integer.parseInt(PEOFcode, 2));
             bitsWritten += PEOFcode.length();
-            
+            if(bitsWritten % 8 != 0){
+
+            }
+            bitsOut.close();
+            bitsIn.close();
             return bitsWritten;
         }
     }
@@ -164,8 +165,19 @@ public class SimpleHuffProcessor implements IHuffProcessor {
      * writing to the output file.
      */
     public int uncompress(InputStream in, OutputStream out) throws IOException {
-	        throw new IOException("uncompress not implemented");
-	        // return 0;
+	    BitInputStream bitIn = new BitInputStream(in);
+        BitOutputStream bitOut = new BitOutputStream(out);
+        int bitsWritten = 0;
+
+        if(bitIn.readBits(BITS_PER_INT) != MAGIC_NUMBER){
+            throw new IOException("This file is not a Huffman coded file");
+        }
+        int headerFormat = bitIn.readBits(BITS_PER_INT);
+        
+        HuffmanTree key = readHeader(bitIn, headerFormat);
+
+        bitsWritten += key.decodeAndWrite(bitIn, bitOut);        
+	
     }
 
     public void setViewer(IHuffViewer viewer) {
