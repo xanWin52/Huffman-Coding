@@ -95,8 +95,10 @@ public class SimpleHuffProcessor implements IHuffProcessor {
             throw new IllegalArgumentException("header format paramater is invalid");
         }
         // return diff between original and huffman bits
+        showString(encBits + "");
         spaceSaved = ogBits - encBits;
         this.headerFormat = headerFormat;
+        showString(spaceSaved + "");
         return spaceSaved;
     }
 
@@ -133,7 +135,8 @@ public class SimpleHuffProcessor implements IHuffProcessor {
             bitsOut.writeBits(BITS_PER_INT, headerFormat);
 
             bitsWritten += BITS_PER_INT * 2;
-            bitsWritten += hTree.writeTree(bitsOut, headerFormat);
+            bitsOut.writeBits(BITS_PER_INT, hTree.calculateTreeHeaderLength());
+            bitsWritten = hTree.writeTree(bitsOut, headerFormat);
             int curCharacter = bitsIn.readBits(BITS_PER_WORD);
 
             while(curCharacter != -1){

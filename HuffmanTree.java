@@ -13,6 +13,7 @@ public class HuffmanTree implements IHuffConstants {
      */
     public HuffmanTree(PriorityQueue314<TreeNode> frequencies, int[] arr){
         frequencies.add(new TreeNode(PSEUDO_EOF, 1));
+        numInternal = 0;
         numLeaves = frequencies.size();
         while(frequencies.size() >= 2){
             TreeNode first = frequencies.dequeue();
@@ -31,11 +32,13 @@ public class HuffmanTree implements IHuffConstants {
      * Recursive map creation algorithm using preorder traversal
      */
     private void createMap(TreeNode node, Map<Integer, String> codes, String code){
-        if(node.isLeaf()){
-            codes.put(node.getValue(), code);
-        } else {
-            createMap(node.getLeft(), codes, code + "0");
-            createMap(node.getRight(), codes, code + "1");
+        if(node != null){
+            if(node.isLeaf()){
+                codes.put(node.getValue(), code);
+            } else {
+                createMap(node.getLeft(), codes, code + "0");
+                createMap(node.getRight(), codes, code + "1");
+            }
         }
     }
 
@@ -48,7 +51,7 @@ public class HuffmanTree implements IHuffConstants {
         //header consists of 32-bit integer that indicates number of bits to store the tree,
         //a 0 for each internal node, and (BITS_PER_WORD + 1) bits per number of leaves,
         // and the length of the PEOF.
-        return BITS_PER_INT + numInternal + numLeaves * (BITS_PER_WORD + 1) 
+        return BITS_PER_INT + numInternal + numLeaves * (BITS_PER_WORD + 2) 
             + codes.get(PSEUDO_EOF).length();
     }
 
@@ -82,7 +85,7 @@ public class HuffmanTree implements IHuffConstants {
             return 1 + BITS_PER_WORD + 1;
         } else {
             out.writeBits(1, 0);
-            int result = 0;
+            int result = 1;
             result += writeTreeHelper(cur.getLeft(), out) + writeTreeHelper(cur.getRight(), out); 
             return result;
         }
