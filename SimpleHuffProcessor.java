@@ -164,8 +164,8 @@ public class SimpleHuffProcessor implements IHuffProcessor {
 	    BitInputStream bitIn = new BitInputStream(in);
         BitOutputStream bitOut = new BitOutputStream(out);
         int bitsWritten = 0;
-
-        if(bitIn.readBits(BITS_PER_INT) != MAGIC_NUMBER){
+        int magicNum = bitIn.readBits(BITS_PER_INT);
+        if(magicNum != MAGIC_NUMBER){
             throw new IOException("This file is not a Huffman coded file");
         }
         int headerFormat = bitIn.readBits(BITS_PER_INT);
@@ -173,7 +173,8 @@ public class SimpleHuffProcessor implements IHuffProcessor {
         HuffmanTree key = readHeader(bitIn, headerFormat);
 
         bitsWritten += key.decodeAndWrite(bitIn, bitOut);
-        bitOut.close();        
+        bitOut.close();
+        showString(bitsWritten + "");
         return bitsWritten;
     }
 

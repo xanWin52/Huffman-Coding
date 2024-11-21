@@ -55,25 +55,26 @@ public class HuffmanTree implements IHuffConstants {
      * @param in The file being written
      * @return The HuffmanTree built
      */
-    public HuffmanTree buildTree(int[] count, BitInputStream in) throws IOException{
-        HuffmanTree result = new HuffmanTree();
+    public void buildTree(int[] count, BitInputStream in) throws IOException{
         root = buildTreeHelper(count, in);
         codes = new HashMap<>();
         createMap(root, codes, "");
-        return result;
     }
 
     private TreeNode buildTreeHelper(int[] count, BitInputStream in) throws IOException{
-        if(count[0] == 0){
+        if(count[0] < 0){
             return null;
         }
         int curChar = in.readBits(1);
         if(curChar == 0){
-            count[0] --;
-            return new TreeNode(buildTreeHelper(count, in), -1, buildTreeHelper(count, in));
+            count[0]--;
+            TreeNode temp = new TreeNode(-1, -1);
+            temp.setLeft(buildTreeHelper(count, in));
+            temp.setRight(buildTreeHelper(count, in));
+            return temp;
         } else if(curChar == 1){
             count[0] --;
-            return new TreeNode(null, in.readBits(BITS_PER_WORD + 1), null);
+            return new TreeNode(in.readBits(BITS_PER_WORD + 1), 0);
         }
         return null;
     }
@@ -145,7 +146,8 @@ public class HuffmanTree implements IHuffConstants {
     public int decodeAndWrite(BitInputStream in, BitOutputStream out) throws IOException{
         TreeNode cur = root;
         int bitsWritten = 0;
-        while(cur.getValue() != PSEUDO_EOF){
+        boolean done = false;
+        while(!done){
             int dir = in.readBits(1);
             if(dir == -1){
                 throw new IOException("File terminated without reaching the EOF character");
@@ -158,12 +160,13 @@ public class HuffmanTree implements IHuffConstants {
             }
 
             if(cur.isLeaf()){
-                String code = codes.get(cur.getValue());
-                if(code != null){
-                    out.writeBits(code.length(), Integer.parseInt(code, 2));
-                    bitsWritten += code.length();
+                if(cur.getValue() == PSEUDO_EOF){
+                    done = true;
+                } else {
+                    out.writeBits(BITS_PER_WORD, cur.getValue());
+                    bitsWritten += BITS_PER_WORD;
+                    cur = root;
                 }
-                cur = root;
             }
 
         }
