@@ -115,7 +115,7 @@ public class HuffmanTree implements IHuffConstants {
         } else if(headerFormat == STORE_TREE){
             out.writeBits(BITS_PER_INT, numInternal + numLeaves * (BITS_PER_WORD + 2));
             bitsWritten += BITS_PER_INT;
-            bitsWritten = writeTreeHelper(root, out);
+            bitsWritten += writeTreeHelper(root, out);
         }
         return bitsWritten;
     }
