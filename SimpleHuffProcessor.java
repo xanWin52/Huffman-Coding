@@ -3,16 +3,16 @@
  *  On <MY|OUR> honor, Xander Nguyen and Siddarth Saladi, this programming assignment is <MY|OUR> own work
  *  and <I|WE> have not provided this code to any other student.
  *
- *  Number of slip days used:
+ *  Number of slip days used: 0
  *
- *  Student 1 Xander Nguyen (Student whose Canvas account is being used)
- *  UTEID: xmn64
- *  email address: xmn64@my.utexas.edu
- *  Grader name: Brad
- *
- *  Student 2 Siddarth Saladi
+ *  Student 1 Siddharth Saladi (Student whose Canvas account is being used)
  *  UTEID: ss229786
  *  email address: sidsaladi@utexas.edu
+ *  Grader name: Brad
+ *
+ *  Student 2 Xander Nguyen
+ *  UTEID: xmn64
+ *  email address: xmn64@my.utexas.edu
  *
  */
 
@@ -74,7 +74,7 @@ public class SimpleHuffProcessor implements IHuffProcessor {
         int encBits = 0;
         // Counts bits in compressed
         for (int x = 0; x < ALPH_SIZE; x++) {
-            if (!(hTree.get(x) == null)){
+            if (!(hTree.get(x) == null)) {
                 encBits += allBits[x] * hTree.get(x).length();
             }
         }
@@ -124,7 +124,7 @@ public class SimpleHuffProcessor implements IHuffProcessor {
 
             //Reading in BITS_PER_WORD bits in at a time
             int curCharacter = bitsIn.readBits(BITS_PER_WORD);
-            while(curCharacter != -1){
+            while(curCharacter != -1) {
                 String huffCode = hTree.get(curCharacter);
                 bitsOut.writeBits(huffCode.length(), Integer.parseInt(huffCode, 2));
                 bitsWritten += huffCode.length();
@@ -158,7 +158,7 @@ public class SimpleHuffProcessor implements IHuffProcessor {
     
         //Check that the file being decompressed is a Huffman coded file
         int magicNum = bitIn.readBits(BITS_PER_INT);
-        if(magicNum != MAGIC_NUMBER){
+        if(magicNum != MAGIC_NUMBER) {
             bitIn.close();
             bitOut.close();
             throw new IOException("This file is not a Huffman coded file");
@@ -179,17 +179,17 @@ public class SimpleHuffProcessor implements IHuffProcessor {
 
     //Private helper method to read the header information and build the HuffmanTree 
     private static HuffmanTree readHeader(BitInputStream in, int headerFormat) throws IOException{
-        if(headerFormat == STORE_COUNTS){
+        if(headerFormat == STORE_COUNTS) {
             PriorityQueue314<TreeNode> pq = new PriorityQueue314<>();
-            for(int i = 0; i < ALPH_SIZE; i ++){
+            for(int i = 0; i < ALPH_SIZE; i ++) {
                 int freq = in.readBits(BITS_PER_INT);
-                if(freq != 0){
+                if(freq != 0) {
                     pq.add(new TreeNode(i, freq));
                 }
             }
             //won't need a frequency array because this tree will be used exclusively for decoding
             return new HuffmanTree(pq, null);
-        } else if(headerFormat == STORE_TREE){
+        } else if(headerFormat == STORE_TREE) {
             int[] numBits = {in.readBits(BITS_PER_INT)};
             HuffmanTree res = new HuffmanTree();
             res.buildTree(numBits, in);
@@ -202,7 +202,7 @@ public class SimpleHuffProcessor implements IHuffProcessor {
         myViewer = viewer;
     }
 
-    private void showString(String s){
+    private void showString(String s) {
         if (myViewer != null) {
             myViewer.update(s);
         }

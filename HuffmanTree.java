@@ -3,16 +3,16 @@
  *  On <MY|OUR> honor, Xander Nguyen and Siddarth Saladi, this programming assignment is <MY|OUR> own work
  *  and <I|WE> have not provided this code to any other student.
  *
- *  Number of slip days used:
+ *  Number of slip days used: 0
  *
- *  Student 1 Xander Nguyen (Student whose Canvas account is being used)
- *  UTEID: xmn64
- *  email address: xmn64@my.utexas.edu
- *  Grader name: Brad
- *
- *  Student 2 Siddarth Saladi
+ *  Student 1 Siddharth Saladi (Student whose Canvas account is being used)
  *  UTEID: ss229786
  *  email address: sidsaladi@utexas.edu
+ *  Grader name: Brad
+ *
+ *  Student 2 Xander Nguyen
+ *  UTEID: xmn64
+ *  email address: xmn64@my.utexas.edu
  *
  */
 
@@ -30,11 +30,11 @@ public class HuffmanTree implements IHuffConstants {
     /*
      * Constructor that builds the Huffman tree using a given PriorityQueue of TreeNodes
      */
-    public HuffmanTree(PriorityQueue314<TreeNode> frequencies, int[] arr){
+    public HuffmanTree(PriorityQueue314<TreeNode> frequencies, int[] arr) {
         frequencies.add(new TreeNode(PSEUDO_EOF, 1));
         numInternal = 0;
         numLeaves = frequencies.size();
-        while(frequencies.size() >= 2){
+        while(frequencies.size() >= 2) {
             TreeNode first = frequencies.dequeue();
             TreeNode second = frequencies.dequeue();
             TreeNode temp = new TreeNode(first, -1, second);
@@ -47,7 +47,7 @@ public class HuffmanTree implements IHuffConstants {
         createMap(root, codes, "");
     }
 
-    public HuffmanTree(){
+    public HuffmanTree() {
         root = null;
         codes = null;
         freqArr = null;
@@ -56,9 +56,9 @@ public class HuffmanTree implements IHuffConstants {
     /*
      * Recursive map creation algorithm using preorder traversal
      */
-    private void createMap(TreeNode node, Map<Integer, String> codes, String code){
-        if(node != null){
-            if(node.isLeaf()){
+    private void createMap(TreeNode node, Map<Integer, String> codes, String code) {
+        if(node != null) {
+            if(node.isLeaf()) {
                 codes.put(node.getValue(), code);
             } else {
                 createMap(node.getLeft(), codes, code + "0");
@@ -73,25 +73,25 @@ public class HuffmanTree implements IHuffConstants {
      * @param in The file being written
      * @return The HuffmanTree built
      */
-    public void buildTree(int[] count, BitInputStream in) throws IOException{
+    public void buildTree(int[] count, BitInputStream in) throws IOException {
         root = buildTreeHelper(count, in);
         codes = new HashMap<>();
         createMap(root, codes, "");
     }
 
     //Recursive method to read the flattened tree and build the resulting huffman tree
-    private TreeNode buildTreeHelper(int[] count, BitInputStream in) throws IOException{
-        if(count[0] < 0){
+    private TreeNode buildTreeHelper(int[] count, BitInputStream in) throws IOException {
+        if(count[0] < 0) {
             return null;
         }
         int curChar = in.readBits(1);
-        if(curChar == 0){
+        if(curChar == 0) {
             count[0]--;
             TreeNode temp = new TreeNode(-1, -1);
             temp.setLeft(buildTreeHelper(count, in));
             temp.setRight(buildTreeHelper(count, in));
             return temp;
-        } else if(curChar == 1){
+        } else if(curChar == 1) {
             count[0] --;
             return new TreeNode(in.readBits(BITS_PER_WORD + 1), 0);
         }
@@ -103,16 +103,16 @@ public class HuffmanTree implements IHuffConstants {
      * STORE_TREE method or the STORE_COUNTS method.
      * @return The number of bits needed to write the header, not including the magic number.
      */
-    public int calculateHeaderLength(int headerFormat){
+    public int calculateHeaderLength(int headerFormat) {
         //header consists of 32-bit integer that indicates number of bits to store the tree,
         //a 0 for each internal node, and (BITS_PER_WORD + 1) bits per number of leaves,
         // and the length of the PEOF.
-        if(headerFormat == STORE_TREE){
+        if(headerFormat == STORE_TREE) {
             return BITS_PER_INT + numInternal + numLeaves * (BITS_PER_WORD + 2) 
                 + codes.get(PSEUDO_EOF).length();
 
         //header consists of 256, 32 bit integers that represent the frequencies of each character
-        } else if(headerFormat == STORE_COUNTS){
+        } else if(headerFormat == STORE_COUNTS) {
             return BITS_PER_INT * ALPH_SIZE + codes.get(PSEUDO_EOF).length();
         }
         throw new IllegalArgumentException("header format paramater is invalid");
@@ -124,14 +124,14 @@ public class HuffmanTree implements IHuffConstants {
      * @param headerFormat Either STORE_COUNTS or STORE_TREE
      * @return The number of bits written
      */
-    public int writeTree(BitOutputStream out, int headerFormat){
+    public int writeTree(BitOutputStream out, int headerFormat) {
         int bitsWritten = 0;
-        if(headerFormat == STORE_COUNTS){
-            for(int i = 0; i < ALPH_SIZE; i ++){
+        if(headerFormat == STORE_COUNTS) {
+            for(int i = 0; i < ALPH_SIZE; i ++) {
                 bitsWritten += BITS_PER_INT;
                 out.writeBits(BITS_PER_INT, freqArr[i]);
             }
-        } else if(headerFormat == STORE_TREE){
+        } else if(headerFormat == STORE_TREE) {
             out.writeBits(BITS_PER_INT, numInternal + numLeaves * (BITS_PER_WORD + 2));
             bitsWritten += BITS_PER_INT;
             bitsWritten += writeTreeHelper(root, out);
@@ -140,17 +140,17 @@ public class HuffmanTree implements IHuffConstants {
     }
 
     //Recursive method to write the flattened Tree
-    private int writeTreeHelper(TreeNode cur, BitOutputStream out){
-        if(cur == null){
+    private int writeTreeHelper(TreeNode cur, BitOutputStream out) {
+        if(cur == null) {
             return 0;
-        } else if(cur.isLeaf()){
+        } else if(cur.isLeaf()) {
             out.writeBits(1, 1);
             out.writeBits(BITS_PER_WORD + 1, cur.getValue());
             return 1 + BITS_PER_WORD + 1;
         } else {
             out.writeBits(1, 0);
             int result = 1;
-            result += writeTreeHelper(cur.getLeft(), out) + writeTreeHelper(cur.getRight(), out); 
+            result += writeTreeHelper(cur.getLeft(), out) + writeTreeHelper(cur.getRight(), out);
             return result;
         }
     }
@@ -161,24 +161,24 @@ public class HuffmanTree implements IHuffConstants {
      * @param out The file being written to
      * @return The number of bits written
      */
-    public int decodeAndWrite(BitInputStream in, BitOutputStream out) throws IOException{
+    public int decodeAndWrite(BitInputStream in, BitOutputStream out) throws IOException {
         TreeNode cur = root;
         int bitsWritten = 0;
         boolean done = false;
-        while(!done){
+        while(!done) {
             int dir = in.readBits(1);
-            if(dir == -1){
+            if(dir == -1) {
                 throw new IOException("File terminated without reaching the EOF character");
             }
 
-            if(dir == 0){
+            if(dir == 0) {
                 cur = cur.getLeft();
-            } else if(dir == 1){
+            } else if(dir == 1) {
                 cur = cur.getRight();
             }
 
-            if(cur.isLeaf()){
-                if(cur.getValue() == PSEUDO_EOF){
+            if(cur.isLeaf()) {
+                if(cur.getValue() == PSEUDO_EOF) {
                     done = true;
                 } else {
                     out.writeBits(BITS_PER_WORD, cur.getValue());
@@ -196,7 +196,7 @@ public class HuffmanTree implements IHuffConstants {
      * @param key The integer representation of the value that needs to be encoded
      * @return The string representation of the Huffman code or null if the key is nonexistant
      */
-    public String get(int key){
+    public String get(int key) {
         return codes.get(key);
     }
 

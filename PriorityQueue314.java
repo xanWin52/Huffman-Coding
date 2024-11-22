@@ -3,16 +3,16 @@
  *  On <MY|OUR> honor, Xander Nguyen and Siddarth Saladi, this programming assignment is <MY|OUR> own work
  *  and <I|WE> have not provided this code to any other student.
  *
- *  Number of slip days used:
+ *  Number of slip days used: 0
  *
- *  Student 1 Xander Nguyen (Student whose Canvas account is being used)
- *  UTEID: xmn64
- *  email address: xmn64@my.utexas.edu
- *  Grader name: Brad
- *
- *  Student 2 Siddarth Saladi
+ *  Student 1 Siddharth Saladi (Student whose Canvas account is being used)
  *  UTEID: ss229786
  *  email address: sidsaladi@utexas.edu
+ *  Grader name: Brad
+ *
+ *  Student 2 Xander Nguyen
+ *  UTEID: xmn64
+ *  email address: xmn64@my.utexas.edu
  *
  */
 public class PriorityQueue314<E extends Comparable<? super E>> {
@@ -20,11 +20,11 @@ public class PriorityQueue314<E extends Comparable<? super E>> {
     private Node<E> front;
     private int size;
     
-    public PriorityQueue314(){
+    public PriorityQueue314() {
         front = null;
     }
 
-    public PriorityQueue314(E front){
+    public PriorityQueue314(E front) {
         this.front = new Node<E>(front, null);
         size = 1;
     }
@@ -33,8 +33,8 @@ public class PriorityQueue314<E extends Comparable<? super E>> {
     /**
      * Add to queue based on node weight
      */
-    public void add(E val){
-        if(front == null || front.data.compareTo(val) > 0){
+    public void add(E val) {
+        if(front == null || front.data.compareTo(val) > 0) {
             Node<E> temp = new Node<E>(val, front);
             front = temp;
             size ++;
@@ -52,7 +52,7 @@ public class PriorityQueue314<E extends Comparable<? super E>> {
      * Size getter method
      * @return the size of the priority queue
      */
-    public int size(){
+    public int size() {
         return size;
     }
 
@@ -60,7 +60,7 @@ public class PriorityQueue314<E extends Comparable<? super E>> {
      * Method to remove from the front of the priority queue
      * @return the data in the removed node
      */
-    public E dequeue(){
+    public E dequeue() {
         Node<E> temp = front;
         front = temp.next;
         temp.next = null;
@@ -68,52 +68,18 @@ public class PriorityQueue314<E extends Comparable<? super E>> {
         return temp.data;
     }
     
-    /*
-     * Wrote for testing purposes
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("PriorityQueue314: ");
-        Node<E> current = front;
-
-        while (current != null) {
-            if (current.data instanceof TreeNode) {
-                TreeNode treeNode = (TreeNode) current.data;
-
-                sb.append("[Freq: ").append(treeNode.getFrequency());
-                sb.append(", Left: ").append(treeNode.getLeft() != null ? treeNode.getLeft().getFrequency() : "null");
-                sb.append(", Right: ").append(treeNode.getRight() != null ? treeNode.getRight().getFrequency() : "null");
-                sb.append("]");
-            } else {
-                sb.append(current.data.toString());
-            }
-
-            if (current.next != null) {
-                sb.append(" -> ");
-            }
-
-            current = current.next;
-        }
-
-        if (front == null) {
-            sb.append("Empty");
-        }
-
-        return sb.toString();
-    }
-
 
 
     private static class Node<E> {
         private E data;
         private Node<E> next;
 
-        public Node(){
+        public Node() {
             data = null;
             next = null;
         }
     
-        public Node(E val, Node<E> next){
+        public Node(E val, Node<E> next) {
             data = val;
             this.next = next;
         }
